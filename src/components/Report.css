@@ -1,0 +1,53 @@
+.report-container {
+  margin: 20px;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  font-family: 'Arial', sans-serif;
+}
+
+h1, h2, h3 {
+  color: #333;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section h2 {
+  color: #2c3e50;
+}
+
+ul, ol {
+  margin-left: 20px;
+}
+
+ol li, ul li {
+  margin-bottom: 10px;
+}
+
+p {
+  color: #555;
+}
+
+/* Add the missing .summary class here */
+.summary {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+/* Optional styling for icons like 🚩 and ❓ */
+.flag {
+  color: red;
+  font-size: 18px;
+  margin-right: 5px;
+}
+
+.pending {
+  color: orange;
+  font-size: 18px;
+  margin-right: 5px;
+}
