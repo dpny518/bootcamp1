@@ -1,7 +1,7 @@
 // Interview.js
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import './Interview.css';
 const questions = [
     "What is your name?",
     "What is your experience in this field?",
@@ -49,9 +49,15 @@ const Interview = () => {
         };
     }, [isRecording]); // Effect runs when isRecording changes
 
+    const handleStartInterview = () => {
+        setIsRecording(true); // Start recording
+    };
+
     const handleNextQuestion = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
+        } else {
+            handleSubmitInterview(); // Submit interview if it's the last question
         }
     };
 
@@ -61,27 +67,26 @@ const Interview = () => {
         navigate('/report'); // Navigate to the report page
     };
 
-    const handleStartInterview = () => {
-        setIsRecording(true); // Start recording
-    };
-
     return (
         <div>
             <h1>Interview</h1>
+            {isRecording && <div><video ref={videoRef} autoPlay width="640" height="480" /></div>}
             <div>
-                <video ref={videoRef} autoPlay width="640" height="480" />
-            </div>
-            <div>
-                <h2>{questions[currentQuestionIndex]}</h2>
-            </div>
-            <div>
-                {currentQuestionIndex < questions.length - 1 ? (
-                    <button onClick={handleNextQuestion}>Next Question</button>
+                {isRecording ? (
+                    <h2>{questions[currentQuestionIndex]}</h2>
                 ) : (
-                    <button onClick={handleSubmitInterview}>Submit Interview</button>
+                    <h2>Press "Start Interview" to begin.</h2>
                 )}
             </div>
-            {!isRecording && <button onClick={handleStartInterview}>Start Interview</button>}
+            <div>
+                {!isRecording ? (
+                    <button onClick={handleStartInterview}>Start Interview</button>
+                ) : (
+                    <button onClick={handleNextQuestion}>
+                        {currentQuestionIndex < questions.length - 1 ? "Next Question" : "Submit Interview"}
+                    </button>
+                )}
+            </div>
         </div>
     );
 };
