@@ -1,97 +1,89 @@
-import React, { useState, useRef } from 'react';
-import Webcam from 'react-webcam';
-import './Interview.css';
-import { useNavigate } from 'react-router-dom'; // Updated import
+// Interview.js
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const questions = [
+    "What is your name?",
+    "What is your experience in this field?",
+    "Why do you want this job?",
+    "What are your strengths and weaknesses?"
+];
 
 const Interview = () => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  
-  const navigate = useNavigate(); // Updated to useNavigate
-  
-  const questions = [
-    "Tell me about your experience with the Red Cross volunteering.",
-    "What motivated you to pursue a degree in biology?",
-    "Describe a challenging project you've worked on in high school.",
-    "What extracurricular activities are you most proud of?",
-  ];
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [isRecording, setIsRecording] = useState(false); // State to manage recording status
+    const videoRef = useRef(null);
+    const navigate = useNavigate();
 
-  const webcamRef = useRef(null);
+    useEffect(() => {
+        let stream;
+        const startCamera = async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            } catch (error) {
+                console.error("Error accessing the camera: ", error);
+            }
+        };
 
-  const startRecording = () => {
-    setIsRecording(true);
-    // Simulate recording behavior
-    setTimeout(() => setTranscript(questions[currentQuestionIndex]), 1000);
-  };
+        if (isRecording) {
+            startCamera();
+        } else {
+            // Cleanup the camera when not recording
+            if (videoRef.current && videoRef.current.srcObject) {
+                const currentStream = videoRef.current.srcObject;
+                const tracks = currentStream.getTracks();
+                tracks.forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
+        }
 
-  const stopRecording = () => {
-    setIsRecording(false);
-  };
+        return () => {
+            // Cleanup when component unmounts
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        };
+    }, [isRecording]); // Effect runs when isRecording changes
 
-  const nextQuestion = () => {
-    setTranscript(''); // Clear transcript between questions
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      // All questions answered, navigate to report page
-      navigate("/report"); // Updated to use navigate
-    }
-  };
+    const handleNextQuestion = () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+        }
+    };
 
-  return (
-    <div className="interview-container">
-      <div className="interview-box">
-        <h1>College Interview AI</h1>
+    const handleSubmitInterview = () => {
+        console.log("Interview submitted");
+        setIsRecording(false); // Stop recording on submit
+        navigate('/report'); // Navigate to the report page
+    };
 
-        {/* Webcam View */}
-        <div className="webcam-wrapper">
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            className="webcam-view"
-          />
+    const handleStartInterview = () => {
+        setIsRecording(true); // Start recording
+    };
+
+    return (
+        <div>
+            <h1>Interview</h1>
+            <div>
+                <video ref={videoRef} autoPlay width="640" height="480" />
+            </div>
+            <div>
+                <h2>{questions[currentQuestionIndex]}</h2>
+            </div>
+            <div>
+                {currentQuestionIndex < questions.length - 1 ? (
+                    <button onClick={handleNextQuestion}>Next Question</button>
+                ) : (
+                    <button onClick={handleSubmitInterview}>Submit Interview</button>
+                )}
+            </div>
+            {!isRecording && <button onClick={handleStartInterview}>Start Interview</button>}
         </div>
-
-        {/* Start and Stop Recording Buttons */}
-        {!isRecording && (
-          <button onClick={startRecording}>
-            {currentQuestionIndex === questions.length - 1 ? "Submit Interview" : "Start Interview"}
-          </button>
-        )}
-
-        {isRecording && (
-          <>
-            <div className="recording">Recording...</div>
-            <button className="stop-button" onClick={stopRecording}>Stop Recording</button>
-          </>
-        )}
-
-        {/* Transcript */}
-        {transcript && (
-          <div className="transcript">
-            <p><strong>Interviewer Question:</strong></p>
-            <p>{transcript}</p>
-          </div>
-        )}
-
-        {/* Next Question Button */}
-        {transcript && currentQuestionIndex < questions.length - 1 && (
-          <button className="next-button" onClick={nextQuestion}>
-            Next Question
-          </button>
-        )}
-
-        {/* Submit Interview Button */}
-        {transcript && currentQuestionIndex === questions.length - 1 && (
-          <button className="submit-button" onClick={nextQuestion}>
-            Submit Interview
-          </button>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Interview;
